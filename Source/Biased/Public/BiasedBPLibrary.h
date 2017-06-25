@@ -58,15 +58,47 @@ struct FBiasedDieData
 		return ProbablilityPairs.Num();
 	}
 
+	//IsValid()
+	bool IsValid() const
+	{
+		return bIsValid;
+	}
+
 private:
 	friend class UBiasedBPLibrary;
 	
+	/**
+	* Adds an alias to the die data
+	*
+	* @Param	DieFace	The face that this alias rolls against
+	* @Param	Alias	The other value of the alias
+	*/
 	void AddDieFaceAlias(FDieFace DieFace, int32 Alias)
 	{
 		ProbablilityPairs.Push(FDieFaceAlias(TPairInitializer<FDieFace, int32>(DieFace, Alias)));
 	}
 
+	/**
+	* Invalidates the biased die data structure, marking it unusable
+	*/
+	void Invalidate()
+	{
+		bIsValid = false;
+		ProbablilityPairs.Empty();
+	}
+
+	/**
+	* Validates the biased die data structure, marking it usable
+	*/
+	void Validate()
+	{
+		bIsValid = true;
+	}
+
+	//List of aliases for die faces
 	TArray< FDieFaceAlias > ProbablilityPairs;
+
+	bool bIsValid;
 
 };
 
@@ -112,7 +144,33 @@ class UBiasedBPLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Roll Biased Die From Stream", Keywords = "biased roll die stream"), Category = "Biased")
 	static int32 RollBiasedDieFromStream(const FBiasedDieData& BiasedDieData, const FRandomStream& RandomStream);
 
+	/**
+	* Adjust the tolerance of the error checking when determining whether or not there is an issue with the die faces
+	*
+	* @param NewTolerance The new tolerance to check with. Should be a reasonably small value.
+	*/
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Adjust error checking tolerance", Keywords = "tolerance"), Category = "Biased")
+	static void AdjustErrorCheckingTolerance(float NewTolerance);
+
+	/**
+	* Checks if a biased die data is valid and ready to be used
+	*
+	* @param	BiasedDieData	The die data to check.
+	* @return	Whether the die data is valid and ready to be used
+	*/
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Is Die Data Valid", Keywords = "valid die data"), Category = "Biased")
+	static bool IsDieDataValid(const FBiasedDieData &BiasedDieData);
+
 private:
 	
 	static int32 InternalRollBiasedDice(const FBiasedDieData &BiasedDieData, int32 RandIndex, float RandRoll);
+
+	//Tolerance we use to check for floating point errors
+	static float FLOATING_POINT_TOLERANCE;
+	
+	//Constant value for no alias
+	static const int32 ALIAS_NONE;
+
+	//Constant value for invalid die roll
+	static const int32 INVALID_ROLL;
 };

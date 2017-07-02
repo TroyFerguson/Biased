@@ -16,6 +16,28 @@ UBiasedBPLibrary::UBiasedBPLibrary(const FObjectInitializer& ObjectInitializer)
 
 }
 
+void UBiasedBPLibrary::NormaliseDieFaces(const TArray<FDieFace>& Faces, TArray<FDieFace>& NormalisedFaces)
+{
+	//Determine the value we need to scale each face by to normalise them
+	float ProbabilityScaleFactor = 0.0f;
+
+	for (FDieFace Face : Faces)
+	{
+		ProbabilityScaleFactor += Face.Probability;
+	}
+
+	//Create a normalised copy of the faces
+	NormalisedFaces.Empty();
+
+	for (FDieFace Face : Faces)
+	{
+		FDieFace NormalisedFace(Face);
+		NormalisedFace.Probability /= ProbabilityScaleFactor;
+
+		NormalisedFaces.Add(NormalisedFace);
+	}
+}
+
 bool UBiasedBPLibrary::GenerateBiasedDieData(const TArray<FDieFace>& Faces, FBiasedDieData& OutBiasedDieData)
 {
 	//Invalidate the die data before we process the new data

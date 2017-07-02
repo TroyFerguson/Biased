@@ -112,6 +112,15 @@ class UBiasedBPLibrary : public UBlueprintFunctionLibrary
 	GENERATED_UCLASS_BODY()
 
 	/**
+	* Normalises a list of die faces so the combined probabilities is 1 and can then be used in
+	* the other processes in this library.
+	*
+	* @param Faces List of die faces you want to normalise.
+	*/
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Normalise Die Faces", Keywords = "biased normalise die"), Category = "Biased")
+	static void NormaliseDieFaces( const TArray<FDieFace>& Faces, TArray<FDieFace>& NormalisedFaces);
+
+	/**
 	* Preprocesses a list of die faces and generates data in a format that allows for constant 
 	* time generation of biased die rolls of the die.
 	*
